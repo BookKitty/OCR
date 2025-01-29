@@ -99,47 +99,62 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
         print("✅ 이미지 가져오기 성공")
         imageView.image = capturedImage
-        performOCR(on: capturedImage)
+        detectBookTitleAndAuthor(in: capturedImage)
+    }
+
+    // MARK: - CoreML Object Detection
+    func detectBookTitleAndAuthor(in image: UIImage) {
+        guard let model = try? VNCoreMLModel(for: MyObjectDetector_1().model) else {
+            print("⚠️ 모델 로드 실패")
+            return
+        }
+
+        let request = VNCoreMLRequest(model: model) { request, error in
+            guard let results = request.results as? [VNRecognizedObjectObservation] else { return }
+
+            for observation in results {
+                let boundingBox = observation.boundingBox
+                print(" 감지된 영역: \(boundingBox)")
+                self.cropAndPerformOCR(from: image, boundingBox: boundingBox)
+            }
+        }
+
+        let handler = VNImageRequestHandler(cgImage: image.cgImage!, options: [:])
+        try? handler.perform([request])
+    }
+
+    // MARK: - 감지된 영역 크롭 후 OCR 실행
+    func cropAndPerformOCR(from image: UIImage, boundingBox: CGRect) {
+        let croppedImage = cropImage(image, to: boundingBox)
+        performOCR(on: croppedImage)
+    }
+
+    func cropImage(_ image: UIImage, to boundingBox: CGRect) -> UIImage {
+        guard let cgImage = image.cgImage else { return image }
+
+        let width = boundingBox.width * CGFloat(cgImage.width)
+        let height = boundingBox.height * CGFloat(cgImage.height)
+        let x = boundingBox.origin.x * CGFloat(cgImage.width)
+        let y = (1 - boundingBox.origin.y - boundingBox.height) * CGFloat(cgImage.height)
+
+        let cropRect = CGRect(x: x, y: y, width: width, height: height)
+        guard let croppedCGImage = cgImage.cropping(to: cropRect) else { return image }
+
+        return UIImage(cgImage: croppedCGImage)
     }
 
     // MARK: - OCR with Vision
     func performOCR(on image: UIImage) {
-        guard let adjustedImage = preprocessImage(image) else {
-            DispatchQueue.main.async {
-                self.resultLabel.text = "이미지 전처리에 실패했습니다."
-            }
-            return
-        }
+        guard let cgImage = image.cgImage else { return }
 
-        imageView.image = adjustedImage // 전처리된 이미지를 표시
-
-        guard let cgImage = adjustedImage.cgImage else {
-            DispatchQueue.main.async {
-                self.resultLabel.text = "CGImage 생성 실패"
-            }
-            return
-        }
-
-        let request = VNRecognizeTextRequest { [weak self] request, error in
-            guard let self = self else { return }
-
-            if let error = error {
-                print("⚠️ OCR 실패: \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    self.resultLabel.text = "텍스트 인식 중 오류가 발생했습니다."
-                }
-                return
-            }
-
+        let request = VNRecognizeTextRequest { request, error in
             guard let observations = request.results as? [VNRecognizedTextObservation], !observations.isEmpty else {
-                print("⚠️ 텍스트 인식 실패: 결과 없음")
                 DispatchQueue.main.async {
                     self.resultLabel.text = "텍스트를 인식하지 못했습니다."
                 }
                 return
             }
 
-            // 텍스트 정렬: 위에서 아래 → 왼쪽에서 오른쪽
             let recognizedTexts = observations.compactMap { $0.topCandidates(1).first?.string }
             DispatchQueue.main.async {
                 self.resultLabel.text = recognizedTexts.joined(separator: "\n")
@@ -149,49 +164,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
         request.recognitionLevel = .accurate
         request.recognitionLanguages = ["ko", "en"]
-        request.minimumTextHeight = 0.02 // 작은 텍스트 인식
 
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        DispatchQueue.global(qos: .userInitiated).async {
-            do {
-                try handler.perform([request])
-            } catch {
-                DispatchQueue.main.async {
-                    self.resultLabel.text = "OCR 처리 중 오류가 발생했습니다."
-                }
-                print("⚠️ OCR 처리 실패: \(error.localizedDescription)")
-            }
-        }
-    }
-
-    // MARK: - Image Preprocessing
-    func preprocessImage(_ image: UIImage) -> UIImage? {
-        guard let ciImage = CIImage(image: image) else {
-            print("⚠️ CIImage 생성 실패")
-            return nil
-        }
-
-        // 그레이스케일 변환 및 대비 증가
-        guard let grayscaleFilter = CIFilter(name: "CIColorControls") else {
-            print("⚠️ Grayscale 변환 필터 생성 실패")
-            return nil
-        }
-        grayscaleFilter.setValue(ciImage, forKey: kCIInputImageKey)
-        grayscaleFilter.setValue(0.0, forKey: kCIInputSaturationKey) // 흑백 변환
-        grayscaleFilter.setValue(1.2, forKey: kCIInputContrastKey) // 대비 증가
-
-        guard let outputImage = grayscaleFilter.outputImage else {
-            print("⚠️ Grayscale 변환 실패")
-            return nil
-        }
-
-        let context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
-        guard let cgImage = context.createCGImage(outputImage, from: outputImage.extent) else {
-            print("⚠️ CGImage 생성 실패")
-            return nil
-        }
-
-        return UIImage(cgImage: cgImage)
+        try? handler.perform([request])
     }
 }
-
