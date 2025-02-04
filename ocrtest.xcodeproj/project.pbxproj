@@ -8,9 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		3829D1862D421F9F0045FB46 /* SwiftyTesseract in Frameworks */ = {isa = PBXBuildFile; productRef = 3829D1852D421F9F0045FB46 /* SwiftyTesseract */; };
-		38CB87862D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 38CB87852D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel */; };
-		38CB87872D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 38CB87852D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel */; };
-		38CB87882D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 38CB87852D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel */; };
+		388779C72D5198B900892602 /* MyObjectDetector5 2.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 388779C62D5198B900892602 /* MyObjectDetector5 2.mlmodel */; };
+		388779C82D5198B900892602 /* MyObjectDetector5 2.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 388779C62D5198B900892602 /* MyObjectDetector5 2.mlmodel */; };
+		388779C92D5198B900892602 /* MyObjectDetector5 2.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 388779C62D5198B900892602 /* MyObjectDetector5 2.mlmodel */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,7 +34,7 @@
 		386510842D40928F00F6BB2E /* ocrtest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ocrtest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3865109A2D40929100F6BB2E /* ocrtestTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ocrtestTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		386510A42D40929100F6BB2E /* ocrtestUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ocrtestUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		38CB87852D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = "MyObjectDetector 1.mlmodel"; sourceTree = "<group>"; };
+		388779C62D5198B900892602 /* MyObjectDetector5 2.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = "MyObjectDetector5 2.mlmodel"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -101,7 +101,7 @@
 				3865109D2D40929100F6BB2E /* ocrtestTests */,
 				386510A72D40929100F6BB2E /* ocrtestUITests */,
 				386510852D40928F00F6BB2E /* Products */,
-				38CB87852D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel */,
+				388779C62D5198B900892602 /* MyObjectDetector5 2.mlmodel */,
 			);
 			sourceTree = "<group>";
 		};
@@ -109,8 +109,8 @@
 			isa = PBXGroup;
 			children = (
 				386510842D40928F00F6BB2E /* ocrtest.app */,
-				3865109A2D40929100F6BB2E /* ocrtestTests.xctest */,
 				386510A42D40929100F6BB2E /* ocrtestUITests.xctest */,
+				3865109A2D40929100F6BB2E /* ocrtestTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -263,7 +263,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				38CB87872D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel in Sources */,
+				388779C72D5198B900892602 /* MyObjectDetector5 2.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,7 +271,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				38CB87862D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel in Sources */,
+				388779C82D5198B900892602 /* MyObjectDetector5 2.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -279,7 +279,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				38CB87882D4A2B93003DFF86 /* MyObjectDetector 1.mlmodel in Sources */,
+				388779C92D5198B900892602 /* MyObjectDetector5 2.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
