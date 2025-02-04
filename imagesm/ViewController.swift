@@ -11,11 +11,12 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     let imageView1 = UIImageView()
     let imageView2 = UIImageView()
+    let urlTextField1 = UITextField()
+    let urlTextField2 = UITextField()
     let compareButton = UIButton()
     let resultLabel = UILabel()
     var selectedImageView: UIImageView?
     
-    // ✅ BookImageComparator 인스턴스 생성
     let imageComparator = BookImageComparator()
 
     override func viewDidLoad() {
@@ -34,6 +35,14 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         imageView1.layer.borderWidth = 1
         imageView2.layer.borderWidth = 1
         
+        urlTextField1.placeholder = "첫 번째 이미지 URL 입력"
+        urlTextField1.borderStyle = .roundedRect
+        urlTextField1.addTarget(self, action: #selector(loadImagePreview1), for: .editingDidEnd)
+
+        urlTextField2.placeholder = "두 번째 이미지 URL 입력"
+        urlTextField2.borderStyle = .roundedRect
+        urlTextField2.addTarget(self, action: #selector(loadImagePreview2), for: .editingDidEnd)
+        
         compareButton.setTitle("비교하기", for: .normal)
         compareButton.setTitleColor(.white, for: .normal)
         compareButton.backgroundColor = .systemBlue
@@ -42,10 +51,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         resultLabel.textAlignment = .center
         resultLabel.numberOfLines = 2
         resultLabel.text = "책 표지를 비교하려면 이미지를 선택하세요."
-        
-        let stackView = UIStackView(arrangedSubviews: [imageView1, imageView2, compareButton, resultLabel])
+
+        let stackView = UIStackView(arrangedSubviews: [imageView1, urlTextField1, imageView2, urlTextField2, compareButton, resultLabel])
         stackView.axis = .vertical
-        stackView.spacing = 20
+        stackView.spacing = 10
         stackView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stackView)
         
@@ -106,26 +115,53 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true)
 
-        if let selectedImage = info[.originalImage] as? UIImage {
-            selectedImageView?.image = selectedImage
+        guard let selectedImage = info[.originalImage] as? UIImage,
+              let selectedImageView = selectedImageView else { return }
+
+        selectedImageView.image = selectedImage
+    }
+
+    // MARK: - URL을 통한 이미지 미리보기 로드
+    @objc func loadImagePreview1() { loadImagePreview(from: urlTextField1.text, into: imageView1) }
+    @objc func loadImagePreview2() { loadImagePreview(from: urlTextField2.text, into: imageView2) }
+
+    func loadImagePreview(from urlString: String?, into imageView: UIImageView) {
+        guard let urlString = urlString, let url = URL(string: urlString) else { return }
+        
+        DispatchQueue.global().async {
+            if let data = try? Data(contentsOf: url), let image = UIImage(data: data) {
+                DispatchQueue.main.async {
+                    imageView.image = image
+                }
+            }
         }
     }
 
-    // MARK: - 이미지 비교 실행
+    // MARK: - 이미지 비교 실행 (URL 또는 로컬 이미지)
     @objc func compareImages() {
-        guard let img1 = imageView1.image, let img2 = imageView2.image else {
-            resultLabel.text = " 두 개의 책 표지를 선택하세요!"
-            return
+        if let url1String = urlTextField1.text, let url2String = urlTextField2.text,
+           let url1 = URL(string: url1String), let url2 = URL(string: url2String) {
+            // URL을 이용한 이미지 비교
+            imageComparator.compareBookImages(url1: url1, url2: url2) { similarity in
+                self.updateResultLabel(similarity)
+            }
+        } else if let img1 = imageView1.image, let img2 = imageView2.image {
+            // 로컬 이미지 비교
+            imageComparator.compareBookImages(image1: img1, image2: img2) { similarity in
+                self.updateResultLabel(similarity)
+            }
+        } else {
+            resultLabel.text = "두 개의 책 표지를 선택하거나 URL을 입력하세요!"
         }
-
-        // 인스턴스를 통해 메서드 호출
-        imageComparator.compareBookImages(image1: img1, image2: img2) { similarity in
-            DispatchQueue.main.async {
-                if let similarity = similarity {
-                    self.resultLabel.text = " 유사도: \(String(format: "%.1f", similarity))%"
-                } else {
-                    self.resultLabel.text = " 유사도 비교 실패"
-                }
+    }
+    
+    // MARK: - 결과 업데이트
+    func updateResultLabel(_ similarity: Float?) {
+        DispatchQueue.main.async {
+            if let similarity = similarity {
+                self.resultLabel.text = "유사도: \(String(format: "%.1f", similarity))%"
+            } else {
+                self.resultLabel.text = "유사도 비교 실패"
             }
         }
     }
